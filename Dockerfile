@@ -1,22 +1,22 @@
-FROM debian:jessie
-MAINTAINER David Personette <dperson@dperson.com>
+FROM resin/rpi-raspbian
+MAINTAINER Nuno Sousa <nunofgs@gmail.com>
 
 # Install transmission
-RUN export DEBIAN_FRONTEND='noninteractive' && \
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys\
-                976B5901365C5CA1 && \
-    echo -n "deb http://ppa.launchpad.net/transmissionbt/ppa/ubuntu" >> \
-                /etc/apt/sources.list && \
-    echo " trusty main" >> /etc/apt/sources.list && \
-    apt-get update -qq && \
-    apt-get install -qqy --no-install-recommends transmission-daemon curl && \
-    apt-get clean && \
-    usermod -d /var/lib/transmission-daemon debian-transmission && \
-    rm -rf /var/lib/apt/lists/* /tmp/*
-COPY transmission.sh /usr/bin/
+ENV DEBIAN_FRONTEND noninteractive
 
-VOLUME ["/var/lib/transmission-daemon"]
+# Install essential tools
+RUN apt-get update && apt-get -qy --force-yes dist-upgrade
+RUN apt-get install -y --no-install-recommends transmission-daemon curl
+
+# Set home directory
+RUN usermod -d /var/lib/transmission-daemon debian-transmission
+
+# Clean up APT when done
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+VOLUME /config
+VOLUME /data
 
 EXPOSE 9091 51413/tcp 51413/udp
 
-ENTRYPOINT ["transmission.sh"]
+ENTRYPOINT ["transmission-daemon", "--foreground", "--log-error", "--auth", "--allowed", "*", "--config-dir", "/config"]
