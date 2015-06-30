@@ -1,5 +1,13 @@
-[![logo](http://blogmmix.ch/sites/default/files/imagecache/gross/6/transmission-bittorrent1.png)](https://www.transmissionbt.com/)
+# Transmission for Raspberry Pi 2
 
-# Transmission
+This is a Dockerfile to set up [Transmission](https://www.transmissionbt.com/).
 
-Transmission docker container
+# Usage
+
+```shell
+$ docker run \
+  -p 9091:9091
+  -v /mnt/data:/data
+  -v ./config:/config
+  nunofgs/rpi-transmission
+```
